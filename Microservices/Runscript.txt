@@ -9,10 +9,10 @@ gunicorn run:app -b 0.0.0.0:7694 -D
 
 source ./venv/bin/activate
 export FLASK_APP=server.py
-python -m flask run -h 0.0.0.0 -p 7694 --reload
+python -m flask run -h 0.0.0.0 -p 7699 --reload
 
 
-gunicorn run:app -b 0.0.0.0:7694 -D 
+gunicorn server:s -b 0.0.0.0:7699 -D
 
 kill -9 XXXX
 
