@@ -25,6 +25,8 @@ while True:
 
     keyword = clientsocket.recv(1024).decode("utf-8")
 
+    keyword = keyword.replace(" ", "%20")
+
 
     link = "https://www.google.com/search?q=" + keyword + "&rlz=1C1GCEU_enUS938US938&sxsrf=AOaemvIfZ0uZWtBAmE29gEZrXAI3986tSg:1635022491397&source=lnms&tbm=nws&sa=X&ved=2ahUKEwjFjLK2teHzAhV6nGoFHVoKBW8Q_AUoAXoECAEQAw&biw=1920&bih=969&dpr=1"
 
