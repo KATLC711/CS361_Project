@@ -1,0 +1,20 @@
+cd web_python
+bash
+virtualenv venv -p $(which python3) 
+source ./venv/bin/activate
+pip3 install --upgrade pip
+pip install -r requirements.txt
+gunicorn run:app -b 0.0.0.0:7694 -D 
+
+
+source ./venv/bin/activate
+export FLASK_APP=server.py
+python -m flask run -h 0.0.0.0 -p 7694 --reload
+
+
+gunicorn run:app -b 0.0.0.0:7694 -D 
+
+kill -9 XXXX
+
+ps ufx | grep gunicorn
+https://github.com/knightsamar/CS340_starter_flask_app
