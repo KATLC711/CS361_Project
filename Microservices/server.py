@@ -1,7 +1,7 @@
 import socket
 import json
 
-from os import environ
+
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 import requests
