@@ -1,65 +1,113 @@
-'''
+from tkinter import *
+from PIL import ImageTk, Image
 from urllib.request import Request, urlopen
-from bs4 import BeautifulSoup
-import requests
-
-keywords = "corgi"
-
-root = "https://www.google.com/search?q=trump"
-link = "https://www.google.com/search?q=" + keywords + "&rlz=1C1GCEU_enUS938US938&sxsrf=AOaemvIfZ0uZWtBAmE29gEZrXAI3986tSg:1635022491397&source=lnms&tbm=nws&sa=X&ved=2ahUKEwjFjLK2teHzAhV6nGoFHVoKBW8Q_AUoAXoECAEQAw&biw=1920&bih=969&dpr=1"
-print(link)
-
-req = Request(link, headers = {'User-Agent' : 'Mozilla/5.0'})
-webpage = urlopen(req).read()
-
-with requests.Session() as c:
-    soup = BeautifulSoup(webpage, 'html5lib')
-    #print(soup)
-
-    for item in soup.find_all('div',attrs = {'class':'ZINbbc xpd O9g5cc uUPGi'}):
-        #print(item)
-
-        title = item.find('div',attrs = {'class' : 'BNeawe vvjwJb AP7Wnd'}).get_text()
-        print(title)
-        raw_link = item.find('a', href = True)['href']
-        link = (raw_link.split("/url?q=")[1]).split('&sa=U&')[0]
-        print(link)
-        raw_description = item.find('div',attrs = {'class' : 'BNeawe s3v9rd AP7Wnd'}).get_text()
-        description = raw_description.split(" · ")[1]
-        print(description)
-'''
+import io
+import json
 
 
+import socket
 
-'''
-from urllib.request import Request, urlopen
-from bs4 import BeautifulSoup
-import requests
+def image_send_request(keywords, client):
+    """
+    Sends request with keywords to server.
+    """
+    client.send(keywords.encode())
 
-keywords = "trump"
+def image_recv_response(client):
+    """
+    Receives image URLs as payload from server response.
+    """
+    response = client.recv(2048).decode()
+    client.close()
 
-#root = "https://www.bing.com/"
-link = "https://www.bing.com/news/search?q=trump&FORM=HDRSC6"
-#print(link)
+    cnt = 0
+    urls = []
+    temp = ''
+    check = False
+    while cnt < len(response):
+        if response[cnt] == "'" and temp == '':
+            check = True
+        elif response[cnt] == "'" and temp != '':
+            check = False
+            urls.append(temp)
+            temp = ""
+        elif check == True:
+            temp = temp + response[cnt]
 
-req = Request(link, headers = {'User-Agent' : 'Mozilla/5.0'})
-webpage = urlopen(req).read()
+        cnt += 1
 
-with requests.Session() as c:
-    soup = BeautifulSoup(webpage, 'html5lib')
-    #print(soup)
-    for item in soup.find_all('div', attrs={'class': 'news-card newsitem cardcommon b_cards2'}):
-        #print(item)
-
-
-        title = item.get_text()
-        print(title)
-        link = item['url']
-        print(link)
-        description = item.find_all('div', attrs={'class': 'snippet'})[0]['title']
-        print(description)
+    return urls
 
 
-'''
+s = socket.socket()
+port = 12345
+s.connect((socket.gethostname(), port))
+
+# Sends request and receives response
+keyword = "Biden"
+image_send_request(keyword, s)
+urls = image_recv_response(s)
 
 
+
+
+
+root = Tk()
+root.title('Codemy.com Image Viewer')
+
+image_list = []
+
+for link in urls:
+    #print(link)
+    image_list.append(ImageTk.PhotoImage(Image.open(io.BytesIO(urlopen(link).read())).resize((350, 300), Image.ANTIALIAS)))
+
+
+my_label = Label(image=image_list[0])
+my_label.grid(row=0, column=0, columnspan=3)
+
+
+def forward(image_number):
+    global my_label
+    global button_forward
+    global button_back
+
+    my_label.grid_forget()
+    my_label = Label(image=image_list[image_number - 1])
+    button_forward = Button(root, text=">>", command=lambda: forward(image_number + 1))
+    button_back = Button(root, text="<<", command=lambda: back(image_number - 1))
+
+    if image_number == 5:
+        button_forward = Button(root, text=">>", state=DISABLED)
+
+    my_label.grid(row=0, column=0, columnspan=3)
+    button_back.grid(row=1, column=0)
+    button_forward.grid(row=1, column=2)
+
+
+def back(image_number):
+    global my_label
+    global button_forward
+    global button_back
+
+    my_label.grid_forget()
+    my_label = Label(image=image_list[image_number - 1])
+    button_forward = Button(root, text=">>", command=lambda: forward(image_number + 1))
+    button_back = Button(root, text="<<", command=lambda: back(image_number - 1))
+
+    if image_number == 1:
+        button_back = Button(root, text="<<", state=DISABLED)
+
+    my_label.grid(row=0, column=0, columnspan=3)
+    button_back.grid(row=1, column=0)
+    button_forward.grid(row=1, column=2)
+
+
+button_back = Button(root, text="<<", command=back, state=DISABLED)
+button_exit = Button(root, text="Exit Program", command=root.quit)
+button_forward = Button(root, text=">>", command=lambda: forward(2))
+
+button_back.grid(row=1, column=0)
+button_exit.grid(row=1, column=1)
+button_forward.grid(row=1, column=2)
+
+root.mainloop()

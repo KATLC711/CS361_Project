@@ -7,6 +7,44 @@ import webbrowser
 import socket
 import json
 from PIL import Image as Pil_image, ImageTk as Pil_imageTk
+import io
+import pickle
+
+
+def image_send_request(keywords, client):
+    """
+    Sends request with keywords to server.
+    """
+    client.send(keywords.encode())
+
+def image_recv_response(client):
+    """
+    Receives image URLs as payload from server response.
+    """
+    response = client.recv(2048).decode()
+    client.close()
+
+    cnt = 0
+    urls = []
+    temp = ''
+    check = False
+    while cnt < len(response):
+        if response[cnt] == "'" and temp == '':
+            check = True
+        elif response[cnt] == "'" and temp != '':
+            check = False
+            urls.append(temp)
+            temp = ""
+        elif check:
+            temp = temp + response[cnt]
+
+        cnt += 1
+
+    return urls
+
+
+
+
 
 
 gui = Tk()
@@ -37,7 +75,6 @@ def placeholder(msg):
     messagebox.showinfo("Webscraping", msg)
 
 
-
 def web_scrapping():
     #messagebox.showinfo("Webscraping", keyword_entry.get())
 
@@ -46,8 +83,7 @@ def web_scrapping():
     HEADERSIZE = 10
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #s.connect((socket.gethostname(), 1234))
-    s.connect((socket.gethostname(), 7699))
+    s.connect((socket.gethostname(), 1234))
 
 
 
@@ -99,10 +135,116 @@ def web_scrapping():
 
 
 
+    s = socket.socket()
+    port = 12345
+    s.connect((socket.gethostname(), port))
+
+    image_send_request(keyword, s)
+    urls = image_recv_response(s)
+
+    image_list = []
+
+    for link in urls:
+        # print(link)
+        image_list.append(
+            Pil_imageTk.PhotoImage(Pil_image.open(io.BytesIO(urlopen(link).read())).resize((350, 300), Pil_image.ANTIALIAS)))
+
+
+    my_label = Label(RightUp, image=image_list[0])
+    my_label.grid(row=0, column=0, columnspan=3,padx = 75)
+
+    #my_label = Label(RightUp, image = image_list[0])
+    #my_label.grid(row=0, column=0,padx = 75, pady = 17)
+
+
+    def forward(image_number):
+        global my_label
+        global button_forward
+        global button_back
+
+        #my_label.grid_forget()
+        my_label = Label(RightUp,image=image_list[image_number - 1])
+        button_forward = Button(RightUp, text=">>", command=lambda: forward(image_number + 1))
+        button_back = Button(RightUp, text="<<", command=lambda: back(image_number - 1))
+
+        if image_number == len(image_list):
+            button_forward = Button(RightUp, text=">>", state=DISABLED)
+
+        my_label.grid(row=0, column=0, columnspan=3)
+        button_back.grid(row=1, column=0)
+        button_exit.grid(row=1, column=1)
+        button_forward.grid(row=1, column=2)
+
+
+    def back(image_number):
+        global my_label
+        global button_forward
+        global button_back
+
+        #my_label.grid_forget()
+        my_label = Label(RightUp,image=image_list[image_number - 1])
+        button_forward = Button(RightUp, text=">>", command=lambda: forward(image_number + 1))
+        button_back = Button(RightUp, text="<<", command=lambda: back(image_number - 1))
+
+        if image_number == 1:
+            button_back = Button(RightUp, text="<<", state=DISABLED)
+
+        my_label.grid(row=0, column=0, columnspan=3)
+        button_back.grid(row=1, column=0)
+        button_exit.grid(row=1, column=1)
+        button_forward.grid(row=1, column=2)
+
+    button_back = Button(RightUp, text="<<", command=back, state=DISABLED)
+    button_exit = Button(RightUp, text="Exit Program", command=gui.quit)
+    button_forward = Button(RightUp, text=">>", command=lambda: forward(2))
+
+    button_back.grid(row=1, column=0)
+    button_exit.grid(row=1, column=1)
+    button_forward.grid(row=1, column=2)
+
+
+
+
+
+    FORMAT = 'utf-8'
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((socket.gethostname(), 5721))
+
+    #function to receive reply from server
+    def youtube_receive():
+        msg = s.recv(1024)
+        data = pickle.loads(msg)    #serialize using pickle
+        return data
+
+    #function to send request to server
+    def youtube_send(msg):
+        data = pickle.dumps(msg)
+        s.send(data)
+
+    youtube_send([keyword]) #input the name of the movie
+    video_result = youtube_receive()
+
+
+    Youtube_Link0 = Label(RightBtm, text="Youtube Title/Description", justify=LEFT)
+    Youtube_Link0.grid(sticky = W,row=0, column=0, padx = 30, pady = 5)
+
+    Youtube_Button0 = Label(RightBtm, text="Hyperlink", justify=LEFT)
+    Youtube_Button0.grid(sticky = W,row=0, column=1, padx = 30, pady = 5)
+
+    for i in range(len(video_result)):
+        Youtube_Link = Label(RightBtm, text=video_result[i]["title"][0:50], justify=LEFT)
+        Youtube_Link.grid(sticky=W, row=i+1, column=0, padx=30, pady=5)
+
+        Youtube_Button = Button(RightBtm, text="Link", command = lambda i = i: callback(video_result[i]['url']))
+        Youtube_Button.grid(row=i+1, column=1, padx=30, pady=5)
+
+
+
 Top = Frame(gui, width=1000,height=80)
 Left = Frame(gui, width=500, height=335)
-RightUp = Frame(gui, bg='red', width=500, height=335)
-RightBtm = Frame(gui, bg='green', width=500, height=335)
+RightUp = Frame(gui, width=500, height=335)
+RightBtm = Frame(gui, width=500, height=335)
 
 do_layout()
 
@@ -146,6 +288,10 @@ about_menu.add_command(label="About", command= lambda: placeholder("This is the 
 
 
 
+
+
+
+'''
 my_img = Pil_image.open("Petey.JPG")
 
 my_img_resized = my_img.resize((350, 300), Pil_image.ANTIALIAS)
@@ -153,6 +299,27 @@ my_img = Pil_imageTk.PhotoImage(my_img_resized)
 
 my_label = Label(RightUp, image = my_img)
 my_label.grid(row=0, column=0,padx = 75, pady = 17)
+
+
+import io
+url1 = "https://beccaboosandkimblebees.files.wordpress.com/"
+url2 = "2013/02/tumblr_mhm8uaxf731rrufwao1_500_large.jpg"
+pic_url = url1 + url2
+
+# open the web page picture and read it into a memory stream
+# and convert to an image Tkinter can handle
+my_page = urlopen(pic_url)
+# create an image file object
+my_picture = io.BytesIO(my_page.read())
+pil_img = Pil_image.open(my_picture)
+# convert to an image Tkinter can use
+tk_img = Pil_imageTk.PhotoImage(pil_img)
+
+my_label = Label(RightUp, image = tk_img)
+my_label.grid(row=0, column=0,padx = 75, pady = 17)
+
+
+
 
 
 
@@ -189,6 +356,7 @@ Youtube_Link4.grid(sticky = W,row=4, column=0, padx = 30, pady = 5)
 
 Youtube_Button4 = Button(RightBtm, text="Link")
 Youtube_Button4.grid(row=4, column=1, padx=30, pady = 5)
+'''
 
 
 

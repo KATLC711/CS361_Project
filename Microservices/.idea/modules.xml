@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../ImageScrapping/.idea/ImageScrapping.iml" filepath="$PROJECT_DIR$/../ImageScrapping/.idea/ImageScrapping.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Microservices.iml" filepath="$PROJECT_DIR$/.idea/Microservices.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../WebScrapping/.idea/WebScrapping.iml" filepath="$PROJECT_DIR$/../WebScrapping/.idea/WebScrapping.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../YoutubeScrapping/.idea/YoutubeScrapping.iml" filepath="$PROJECT_DIR$/../YoutubeScrapping/.idea/YoutubeScrapping.iml" />
     </modules>
   </component>
 </project>
