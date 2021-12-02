@@ -43,23 +43,41 @@ while True:
 
         for item in soup.find_all('div', attrs={'class': 'ZINbbc xpd O9g5cc uUPGi'}):
             title = item.find('div', attrs={'class': 'BNeawe vvjwJb AP7Wnd'}).get_text()
-            # print(title)
+
             d["title"].append(title)
 
             raw_link = item.find('a', href=True)['href']
             link = (raw_link.split("/url?q=")[1]).split('&sa=U&')[0]
-            # print(link)
+         
             d["link"].append(link)
 
             raw_description = item.find('div', attrs={'class': 'BNeawe s3v9rd AP7Wnd'}).get_text()
             description = raw_description.split(" · ")[1]
-            # print(description)
+           
             d["description"].append(description)
 
             d["search_pf"].append('Google')
 
 
+    link = "https://www.bing.com/news/search?q=" + keyword + '&FORM=HDRSC6'
 
+    req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
+    webpage = urlopen(req).read()
+    with requests.Session() as c:
+        soup = BeautifulSoup(webpage, 'html5lib')
+        
+        for item in soup.find_all('div', attrs={'class': 'news-card newsitem cardcommon b_cards2'}):
+
+            title = item.get_text()
+            d["title"].append(title)
+
+            link = item['url']
+            d["link"].append(link)
+
+            description = item.find_all('div', attrs={'class': 'snippet'})[0]['title']
+            d["description"].append(description)
+
+            d["search_pf"].append('Bing')
 
 
 
