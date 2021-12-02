@@ -23,8 +23,8 @@ global keyword1, keyword2, keyword3, keyword4, option1, option2, option3
 
 image_header = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3"}
 
-email_address = ''
-email_password = ''
+email_address = 'haycthtw@gmail.com'
+email_password = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 
 freq_option = ["1 mins", "5 mins", "10 mins", "30 mins", "60 mins", "6 hrs", "24 hrs"]
@@ -41,6 +41,9 @@ def frequency_popup():
     freq = Toplevel()
     freq.geometry("500x350")
     freq.wm_title("Frequency Setting")
+
+    freq_keyword_prompt2 = Label(freq,text="Select an appropriate time interval. If the frequency is high, it may overload your GUI. ")
+    freq_keyword_prompt2.pack(pady=10)
 
     freq_keyword_prompt = Label(freq, text="Please select your keyword: ").pack(pady=10)
     freq_keyword_entry = Entry(freq)
@@ -94,7 +97,7 @@ email_entry_status = ''
 text_entry_status = ''
 
 
-# Show the window
+
 def result_popup():
     '''Function to pop up the result communication toplevel'''
     global email_checked, text_checked, email_entry_status, text_entry_status, result_communication, email_entry, text_entry, text_status, email_status
@@ -102,7 +105,7 @@ def result_popup():
     result_communication.deiconify()
 
 
-# Hide the window
+
 def result_hide():
     '''Function to hide the result communication toplevel'''
     global email_checked, text_checked, email_entry_status, text_entry_status, result_communication, email_entry, text_entry, text_status, email_status
@@ -159,7 +162,7 @@ def result_launch():
 
 
 
-# Show the window
+
 def history_popup():
     '''function to show the history toplevel'''
     global history, search_history
@@ -167,7 +170,7 @@ def history_popup():
     history.deiconify()
 
 
-# Hide the window
+
 def history_hide():
     '''function to hide the history toplevel'''
     global history, search_history
@@ -251,7 +254,7 @@ def send_email(msg, recipent):
 def send_text(msg, recipent):
     '''function to send out web scrapping result via text'''
     account_sid = 'AC86b8bf8ca08fd5478f9ac4fd9ac7dcd9'
-    auth_token = ''
+    auth_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     client = Client(account_sid, auth_token)
 
     message = client.messages \
@@ -395,7 +398,7 @@ def instruction_popup():
     instruction_page.deiconify()
 
 
-# Hide the window
+
 def instruction_hide():
     '''Function to hide the instruction toplevel'''
     global instruction_page
@@ -417,14 +420,14 @@ def instruction_launch():
     Keyword_header = Label(instruction_page, text = "Start Search", font = "bold", justify=LEFT)
     Keyword_header.pack(padx = 10, pady = 1, anchor = "w")
 
-    Keyword_instruction = Label(instruction_page, text = "Input your keyword at the front page and press enter to start the search. You will receive the text/image/Youtube Webscrapping result in a while.", wraplength=450, justify=LEFT)
+    Keyword_instruction = Label(instruction_page, text = "Input your keyword at the front page and press enter to start the search. You will receive the text/image/Youtube Webscrapping result in a while. Note that the image scrapping services may take a little while.", wraplength=450, justify=LEFT)
     Keyword_instruction.pack(padx = 10, anchor = "w")
 
 
     Keyword_header = Label(instruction_page, text = "Timer", font = "bold", justify=LEFT)
     Keyword_header.pack(padx = 10, pady = 1, anchor = "w")
 
-    Keyword_instruction = Label(instruction_page, text = "Input your keyword and select the frequency in the Frequency window under Option Menu. Click Enter and the webscrapping result will be delivered at the selected time interval. Compatible with the Result Communication options.", wraplength=450, justify=LEFT)
+    Keyword_instruction = Label(instruction_page, text = "Input your keyword and select the frequency in the Frequency window under Option Menu. Click Enter and the webscrapping result will be delivered at the selected time interval. Click Stop at the GUI to stop the function. Compatible with the Result Communication options.", wraplength=450, justify=LEFT)
     Keyword_instruction.pack(padx = 10, anchor = "w")
 
 
@@ -516,14 +519,9 @@ def placeholder(msg):
     messagebox.showinfo("Webscraping", msg)
 
 
-def web_scrapping(keyword):
-    '''Main function to perform all three scrappings '''
+def text_scrapping(keyword):
+    '''Performing text scrapping'''
     global email_checked, text_checked, search_history
-
-
-    if keyword[0] != '"':
-        keyword = '"' + keyword + '"'
-
     HEADERSIZE = 10
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -537,17 +535,13 @@ def web_scrapping(keyword):
     while True:
         msg = s.recv(16)
         if new_msg:
-            #print(f"new message length: {msg[:HEADERSIZE]}")
             msglen = int(msg[:HEADERSIZE])
             new_msg = False
 
         full_msg += msg.decode("utf-8")
 
         if len(full_msg) - HEADERSIZE == msglen:
-            #print("full msg received")
-
             d = json.loads(full_msg[HEADERSIZE:])
-            #print(d)
 
             new_msg = True
             full_msg = ''
@@ -589,7 +583,6 @@ def web_scrapping(keyword):
     msg = f'Subject: {subject}\n\n{body}'
     msg_body = f'Subject: {subject}\n\n{msg_body}'
 
-    print(email_status, email_entry_status, text_status, text_entry_status)
 
     if email_status == 1:
         send_email(msg, email_entry_status)
@@ -598,6 +591,11 @@ def web_scrapping(keyword):
         send_text(msg_body, text_entry_status)
 
 
+
+
+def image_scrapping(keyword):
+    '''image scrapping services'''
+    global email_checked, text_checked, search_history
     s = socket.socket()
     port = 12345
     s.connect((socket.gethostname(), port))
@@ -608,7 +606,6 @@ def web_scrapping(keyword):
     image_list = []
 
     for link in urls:
-        # print(link)
         try:
             image_list.append(
                 Pil_imageTk.PhotoImage(Pil_image.open(io.BytesIO(urlopen(link).read())).resize((350, 300), Pil_image.ANTIALIAS)))
@@ -625,7 +622,7 @@ def web_scrapping(keyword):
         global button_forward
         global button_back
 
-        #my_label.grid_forget()
+
         my_label = Label(RightUp,image=image_list[image_number - 1])
         button_forward = Button(RightUp, text=">>", command=lambda: forward(image_number + 1))
         button_back = Button(RightUp, text="<<", command=lambda: back(image_number - 1))
@@ -635,7 +632,7 @@ def web_scrapping(keyword):
 
         my_label.grid(row=0, column=0, columnspan=3)
         button_back.grid(row=1, column=0)
-        button_exit.grid(row=1, column=1)
+
         button_forward.grid(row=1, column=2)
 
 
@@ -644,7 +641,7 @@ def web_scrapping(keyword):
         global button_forward
         global button_back
 
-        #my_label.grid_forget()
+
         my_label = Label(RightUp,image=image_list[image_number - 1])
         button_forward = Button(RightUp, text=">>", command=lambda: forward(image_number + 1))
         button_back = Button(RightUp, text="<<", command=lambda: back(image_number - 1))
@@ -654,37 +651,39 @@ def web_scrapping(keyword):
 
         my_label.grid(row=0, column=0, columnspan=3)
         button_back.grid(row=1, column=0)
-        button_exit.grid(row=1, column=1)
+
         button_forward.grid(row=1, column=2)
 
     button_back = Button(RightUp, text="<<", command=back, state=DISABLED)
-    button_exit = Button(RightUp, text="Exit Program", command=gui.quit)
+
     button_forward = Button(RightUp, text=">>", command=lambda: forward(2))
 
     button_back.grid(row=1, column=0)
-    button_exit.grid(row=1, column=1)
+
     button_forward.grid(row=1, column=2)
 
 
 
-
+def youtube_scrapping(keyword):
+    '''youtube scrapping'''
+    global email_checked, text_checked, search_history
     FORMAT = 'utf-8'
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((socket.gethostname(), 5721))
 
-    #function to receive reply from server
+
     def youtube_receive():
         msg = s.recv(1024)
-        data = pickle.loads(msg)    #serialize using pickle
+        data = pickle.loads(msg)
         return data
 
-    #function to send request to server
+
     def youtube_send(msg):
         data = pickle.dumps(msg)
         s.send(data)
 
-    youtube_send([keyword]) #input the name of the movie
+    youtube_send([keyword])
     video_result = youtube_receive()
 
 
@@ -700,6 +699,22 @@ def web_scrapping(keyword):
 
         Youtube_Button = Button(RightBtm, text="Link", command = lambda i = i: callback(video_result[i]['url']))
         Youtube_Button.grid(row=i+1, column=1, padx=30, pady=5)
+
+
+
+
+def web_scrapping(keyword):
+    '''Main function to perform all three scrappings '''
+    global email_checked, text_checked, search_history
+
+
+    if keyword[0] != '"':
+        keyword = '"' + keyword + '"'
+
+
+    text_scrapping(keyword)
+    image_scrapping(keyword)
+    youtube_scrapping(keyword)
 
 
 
