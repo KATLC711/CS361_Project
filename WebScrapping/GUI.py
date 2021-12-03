@@ -13,6 +13,7 @@ import pickle
 import time, threading
 import tkinter.messagebox as tkMessageBox
 import smtplib
+import api_key
 from datetime import datetime
 from twilio.rest import Client
 global email_checked, text_checked, email_entry_status, text_entry_status, result_communication, email_entry, text_entry
@@ -23,8 +24,8 @@ global keyword1, keyword2, keyword3, keyword4, option1, option2, option3
 
 image_header = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3"}
 
-email_address = 'haycthtw@gmail.com'
-email_password = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+email_address = api_key.GUI_email
+email_password = api_key.GUI_password
 
 
 freq_option = ["1 mins", "5 mins", "10 mins", "30 mins", "60 mins", "6 hrs", "24 hrs"]
@@ -253,14 +254,14 @@ def send_email(msg, recipent):
 
 def send_text(msg, recipent):
     '''function to send out web scrapping result via text'''
-    account_sid = 'AC86b8bf8ca08fd5478f9ac4fd9ac7dcd9'
-    auth_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    account_sid = api_key.account_sid
+    auth_token = api_key.auth_token
     client = Client(account_sid, auth_token)
 
     message = client.messages \
         .create(
         body=msg,
-        from_='+17406933900',
+        from_= api_key.phone_no,
         to=recipent
     )
 
